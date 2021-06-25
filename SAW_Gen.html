@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+        <title>SAW-Generator</title>
+        <meta charset="UTF-8">
+        <style>
+            body {
+                font-family: arial;
+            }
+            
+            input {
+                width: 150px;
+            }
+            #ft {
+                width: 115px;
+                position: absolute;
+                top: 21px;
+            }
+            #ftl {
+                position: absolute;
+                left: 550px;
+                top: 220px;
+            }
+            #nr {
+                margin-left: 200px;
+            }
+            #bc {
+                position: absolute;
+                left: 800px;
+                top: 100px;
+                width: 687px;
+                height: 405px;
+                padding-right: 50px;
+            }
+            #sd {
+                position: absolute;
+                left: 80px;
+                top: 675px;
+            }
+            #ad {
+                position: absolute;
+                left: 135px;
+                top: 709px;
+            }
+            #sul {
+                position: absolute;
+                left: 300px;
+                top: 509px;
+                width: 200px;
+            }
+        </style>
+    </head>
+    <body onload="aktua()">
+        <script src="https://github.com/devongovett/pdfkit/releases/download/v0.10.0/pdfkit.standalone.js"></script>
+        <script src="https://github.com/devongovett/blob-stream/releases/download/v0.1.3/blob-stream.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+        <h1><u>Schülerausweis Generator 2020/2021</u></h1>
+        <h2>Schülerausweis</h2>
+        <BR>
+        <b>
+        <input id="vn" placeholder="Vorname" onchange="aktua()">
+        <input id="nn" placeholder="Nachname" onchange="aktua()">
+        </b>
+        <BR>
+        <BR>
+        <input id="str" placeholder="Straße" onchange="aktua()">
+        <input id="hnr" placeholder="Hausnummer" onchange="aktua()">
+        <BR>
+        <BR>
+        <BR>
+        <input id="plz" placeholder="Postleitzahl" onchange="aktua()">
+        <input id="wo" placeholder="Wohnort" onchange="aktua()">
+        <image id="bc"></image>
+        <BR>
+        <BR>
+        <input id="gt" placeholder="Geburtstag" onchange="aktua()">
+        <input id="nr" placeholder="Nummer" onchange="aktua()">
+        <BR>
+        <BR>
+        <p id="vt">
+            ist Schüler/in unserer Schule/is a student of <BR>
+            our school/est un/e élève notre école
+        </p>
+        <label id="ftl" for="ft" >Foto(etwa 308px x 460px): <BR><input id="ft" placeholder="Foto" type="file" accept="image/*" onchange="aktua()"></label>
+        <BR>
+        <BR>
+        <BR>
+        <BR>
+        <p>Wilhelm-Hitorf-Gymnasium</p>
+        <BR>
+        <p>Städtisches Gymnasium</p>
+        <p>Prinz-Eugen-Str. 27</p>
+        <p>48151 Münster</p>
+        <BR>
+        <p>Münster, </p>
+        <input id="sd" placeholder="Startdatum" onchange="aktua()">
+        <p>Gültigkeitsdauer: </p>
+        <input id="ad" placeholder="Ablaufdatum" onchange="aktua()">
+        <h1>Unterschrift</h1>
+        <image src="uusul.jpg" id="sul"></image>
+        <p>Schulleitung/School Administration/Direction d'ecole</p>
+        <BR>
+        <BR>
+        <iframe width="420px" height="594" src=""></iframe>
+        <button onclick="aktua()">Aktualisieren</button>
+        <script>
+            function aktua() {
+                
+                var barcode = document.getElementById("nr").value;
+                JsBarcode("#bc", barcode, {
+                    width: 12.05,
+                    height: 405,
+                    displayValue: false,
+                    margin: 0
+                });
+                
+                //PDF
+                const doc = new PDFDocument({size: 'A4'});
+
+                // pipe the document to a blob
+                const stream = doc.pipe(blobStream());
+                
+                doc.registerFont("Arial Narrow", "fonts/an_bold.TTF");
+                
+                //Rahmen und Linie
+                doc.rect(186.7,350.5,221.9,140.9)
+                    .stroke()
+                    .lineWidth(1);
+                doc.rect(193.2,378.8,214.6,2.5)
+                    .fill();
+                //"Schülerausweis
+                doc.font('Helvetica-Bold', 20.4)
+                    .text("Schülerausweis", 222, 357.9);
+                //Vorname und Nachname
+                doc.font('Helvetica-Bold', 12)
+                    .text(document.getElementById("vn").value + " " + document.getElementById("nn").value, 193.8, 385.1);
+                //Straße und Hausnummer
+                doc.font('Helvetica', 10.3)
+                    .text(document.getElementById("str").value + " " + document.getElementById("hnr").value, 193.8, 403.7);
+                //PLZ und Wohnort
+                doc.font('Helvetica', 10.1)
+                    .text(document.getElementById("plz").value, 193.5, 425.5);
+                doc.font('Helvetica', 10.1)
+                    .text(document.getElementById("wo").value, 226, 425.4);
+                //Geburtstag
+                doc.font('Helvetica', 9.9)
+                    .text(document.getElementById("gt").value, 193.7, 442.2);
+                //Text
+                doc.font('Helvetica', 7.1)
+                    .text("ist Schüler/in unserer Schule/is a student of", 193.9, 460.3);
+                doc.font('Helvetica', 7.1)
+                    .text("our school/est un/e élève de notre école", 193.5, 467.9);
+                //Nummer und Barcode
+                doc.font('Courier', 9)
+                    .text(document.getElementById("nr").value, 277.3, 445.8);
+                doc.image(document.getElementById("bc").src, 276.1, 420.2, {width: 41.2, height: 24.3})
+                //Foto
+                //doc.image(document.getElementById("ft").value, 339.1,402.3, {fit: [55.4, 83.2]})
+
+
+                // Add another page
+                doc.addPage()
+                
+                //Unterschrift, Siegel und Logo
+                //doc.image(document.getElementById("sul").src, 212.2, 354.5)
+                //Rahmen und Linie
+                doc.rect(186.7,350.5,221.9,140.9)
+                    .stroke()
+                    .lineWidth(1);
+                //Schuldaten
+                doc.font('Helvetica', 10)
+                    .text("Wilhelm-Hittorf-Gymnasium", 205.9, 355.7);
+                doc.font('Helvetica', 10)
+                    .text("Städtisches Gymnasium", 206.1, 374.4);
+                doc.font('Helvetica', 10)
+                    .text("Prinz-Eugen-Str. 27", 206.5, 388.1);
+                doc.font('Helvetica', 10)
+                    .text("48151", 205.7, 403.8);
+                doc.font('Helvetica', 10)
+                    .text("Münster", 239.3, 403.8);
+                //Daten
+                doc.font('Helvetica', 10)
+                    .text("Münster, " + document.getElementById("sd").value, 206.5, 421.7);
+                doc.font('Helvetica', 6.7)
+                    .text("Gültigkeitsdauer: " + document.getElementById("ad").value, 206.1, 436.4);
+                //Text und Linie
+                doc.rect(190.9,474.6,208.9,0.8)
+                    .fill();
+                doc.font('Helvetica', 8.1)
+                    .text("Schulleitung/School Administration/Direction d'ecole", 200.7, 477.5);
+                
+                
+                // get a blob when you're done
+                doc.end();
+
+                const a = document.createElement("a");
+                document.body.appendChild(a);
+                a.style = "display: none";
+
+                let blob;
+
+                function download() {
+                  if (!blob) return;
+                  var url = window.URL.createObjectURL(blob);
+                  a.href = url;
+                  a.download = 'test.pdf';
+                  a.click();
+                  window.URL.revokeObjectURL(url);
+                }
+
+                stream.on("finish", function() {
+                  // get a blob you can do whatever you like with
+                  blob = stream.toBlob("application/pdf");
+
+                  // or get a blob URL for display in the browser
+                  const url = stream.toBlobURL("application/pdf");
+                  const iframe = document.querySelector("iframe");
+                  iframe.src = url;
+                });
+            }
+            
+            function getBase64Image(img) {
+                var canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                var ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+
+                var dataURL = canvas.toDataURL("image/png");
+
+                return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+            }
+
+        </script>
+    </body>
+
+</html>
